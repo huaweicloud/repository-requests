@@ -90,6 +90,31 @@ def parse_repo_type_combo(combo):
     return None, combo
 
 
+def normalize_repo_type_combo(combo):
+    """将英文表单的组合选项映射为内部统一的中文组合。
+
+    英文示例: Product/SDK、Sample/Lab/Sample、Documentation/Docs/Dataset、Internal/Internal Config
+    """
+    combo = (combo or "").strip()
+    mapping = [
+        ("Product / SDK", "产品项目 / SDK"),
+        ("Product / Terraform Provider", "产品项目 / Terraform Provider"),
+        ("Product / GitHub Action", "产品项目 / GitHub Action"),
+        ("Product / Framework Integration", "产品项目 / 框架集成"),
+        ("Product / Exporter / Plugin", "产品项目 / Exporter / Plugin"),
+        ("Product / IoT SDK", "产品项目 / IoT SDK"),
+        ("Sample / Lab / Sample", "示例教程 / 示例 / Lab / Sample"),
+        ("Documentation / Docs / Dataset", "文档数据 / 文档 / 数据集"),
+        ("Internal / Internal Config", "内部配置 / 内部配置"),
+    ]
+    # 去空格比较，容忍差异
+    norm = combo.replace(" ", "")
+    for en, zh in mapping:
+        if norm == en.replace(" ", ""):
+            return zh
+    return combo
+
+
 
 
 
@@ -554,16 +579,515 @@ device.connect()
 }
 
 
+# ─── README 模板（英文版，9套） ───
+
+README_TEMPLATES_EN = {
+
+    "SDK": """# {name}
+
+[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
 
 
 
-def make_readme(name, repo_type, license_name, description):
+{description}
 
-    tmpl = README_TEMPLATES.get(repo_type, README_TEMPLATES["SDK"])
+
+
+## Installation
+
+```bash
+
+pip install {name}
+
+```
+
+
+
+## API Reference
+
+TBD
+
+
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+
+
+## License
+
+This project is licensed under the {license} license.
+
+""",
+
+    "Terraform Provider": """# {name}
+
+[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+
+
+
+{description}
+
+
+
+## Provider Configuration
+
+```hcl
+
+provider "{name}" {{
+
+  # configuration
+
+}}
+
+```
+
+
+
+## Resource / DataSource List
+
+TBD
+
+
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+""",
+
+    "GitHub Action": """# {name}
+
+[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+
+
+
+{description}
+
+
+
+## Inputs
+
+| Input | Type | Required | Default | Description |
+
+|-------|------|----------|---------|-------------|
+
+
+
+## Outputs
+
+| Output | Description |
+
+|--------|-------------|
+
+
+
+## Usage Example
+
+```yaml
+
+- uses: huaweicloud/{name}@v1
+
+  with:
+
+    param: value
+
+```
+
+
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+""",
+
+    "框架集成": """# {name}
+
+[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+
+
+
+{description}
+
+
+
+## Quick Start
+
+```bash
+
+pip install {name}
+
+```
+
+
+
+## Configuration
+
+TBD
+
+
+
+## Version Compatibility
+
+| Version | Compatible Language / Framework | Status |
+
+|---------|--------------------------------|--------|
+
+
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+""",
+
+    "Exporter / Plugin": """# {name}
+
+[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+
+
+
+{description}
+
+
+
+## Deployment
+
+```bash
+
+docker run -d --name {name} huaweicloud/{name}:latest
+
+```
+
+
+
+## Metrics
+
+TBD
+
+
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+""",
+
+    "IoT SDK": """# {name}
+
+[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+
+
+
+{description}
+
+
+
+## Hardware Requirements
+
+TBD
+
+
+
+## Device Connection Example
+
+```python
+
+from {name} import Device
+
+device = Device("device-id")
+
+device.connect()
+
+```
+
+
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+""",
+
+    "示例 / Lab / Sample": """# {name}
+
+
+
+{description}
+
+
+
+## Prerequisites
+
+- Language environment
+
+- Dependencies installed
+
+
+
+## Run Steps
+
+```bash
+
+# Run the sample
+
+```
+
+
+
+## Screenshots / Output
+
+TBD
+
+""",
+
+    "文档 / 数据集": """# {name}
+
+
+
+{description}
+
+
+
+## Content
+
+TBD
+
+
+
+## Usage
+
+TBD
+
+""",
+
+    "内部配置": """# {name}
+
+
+
+{description}
+
+
+
+> Internal configuration repository
+
+
+
+## Purpose
+
+TBD
+
+
+
+## Usage
+
+TBD
+
+""",
+
+}
+
+
+
+
+
+def make_readme(name, repo_type, license_name, description, lang="zh"):
+
+    if lang == "en":
+
+        tmpl = README_TEMPLATES_EN.get(repo_type, README_TEMPLATES_EN["SDK"])
+
+    else:
+
+        tmpl = README_TEMPLATES.get(repo_type, README_TEMPLATES["SDK"])
 
     return tmpl.format(name=name, license=license_name, description=description)
 
 
+
+
+
+# ─── 文件模板 ───
+
+CONTRIBUTING_MD_EN = """# Contributing to {name}
+
+
+
+## Development Setup
+
+See README.
+
+
+
+## Commit Convention
+
+Use conventional commits: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`
+
+
+
+## Pull Request Workflow
+
+1. Fork the repository
+
+2. Create a branch `feat/xxx`
+
+3. Commit your changes
+
+4. Open a Pull Request
+
+5. At least 2 reviewers approve and CI passes before merge
+
+
+
+## Issue Guidelines
+
+Use the Bug Report / Feature Request templates
+
+"""
+
+
+
+SECURITY_MD_EN = """# Security Policy
+
+
+
+## Reporting Security Vulnerabilities
+
+If you discover a security vulnerability, please send an email to huaweicloud@huawei.com. **Do NOT disclose it in a public Issue.**
+
+
+
+## Supported Versions
+
+| Version | Supported |
+
+|---------|-----------|
+
+| Latest  | Active support |
+
+"""
+
+
+
+COC_MD_EN = """# Contributor Covenant Code of Conduct
+
+
+
+## Our Pledge
+
+We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone.
+
+
+
+## Our Standards
+
+- Use welcoming and inclusive language
+
+- Respect differing viewpoints and experiences
+
+- Accept constructive criticism gracefully
+
+
+
+## Enforcement
+
+Instances of abusive behavior may be reported to the project maintainers.
+
+"""
+
+
+
+BUG_REPORT_YML_EN = """name: Bug Report
+
+description: Report a bug
+
+labels: ["type/bug"]
+
+body:
+
+  - type: textarea
+
+    attributes:
+
+      label: Description
+
+      description: What happened
+
+    validations:
+
+      required: true
+
+  - type: textarea
+
+    attributes:
+
+      label: Steps to Reproduce
+
+  - type: textarea
+
+    attributes:
+
+      label: Expected Behavior
+
+  - type: textarea
+
+    attributes:
+
+      label: Environment
+
+"""
+
+
+
+FEATURE_YML_EN = """name: Feature Request
+
+description: Request a new feature
+
+labels: ["type/feature"]
+
+body:
+
+  - type: textarea
+
+    attributes:
+
+      label: Description
+
+      description: What feature would you like to add
+
+    validations:
+
+      required: true
+
+  - type: textarea
+
+    attributes:
+
+      label: Use Case
+
+"""
+
+
+
+PR_TEMPLATE_EN = """## Change Summary
+
+
+
+## Related Issue
+
+Fixes #
+
+
+
+## Testing
+
+- [ ] Unit tests passed
+
+- [ ] Manual testing passed
+
+"""
 
 
 
@@ -1223,22 +1747,40 @@ def main():
 
 
     # parse form fields (section header -> next line is value)
+    # 同时支持中英文表单字段
 
     lines = body.split("\n")
 
     fields = {}
 
+    # 中英文字段前缀映射（key → 统一字段名）
+    prefix_map = [
+        ("### 初始化语言", "初始化语言"),
+        ("### Initialization Language", "初始化语言"),
+        ("### 仓库类型", "仓库类型"),
+        ("### Repository Type", "仓库类型"),
+        ("### 仓库名称", "仓库名称"),
+        ("### Repository Name", "仓库名称"),
+        ("### 仓库描述", "仓库描述"),
+        ("### Repository Description", "仓库描述"),
+        ("### 可见性", "可见性"),
+        ("### Visibility", "可见性"),
+        ("### 开源许可证", "开源许可证"),
+        ("### Open Source License", "开源许可证"),
+        ("### Topics 标签", "Topics 标签"),
+        ("### Topics Tags", "Topics 标签"),
+        ("### Owner", "Owner"),
+        ("### Maintainer", "Maintainer"),
+        ("### Writer", "Writer"),
+        ("### 申请理由", "申请理由"),
+        ("### Justification", "申请理由"),
+    ]
+
     for i, line in enumerate(lines):
 
-        for prefix in ["### 仓库类型", "### 仓库名称", "### 仓库描述", "### 可见性",
-
-                        "### 开源许可证", "### Topics 标签", "### Owner", "### Maintainer",
-
-                        "### Writer", "### 申请理由"]:
+        for prefix, key in prefix_map:
 
             if line.startswith(prefix):
-
-                key = prefix.replace("### ", "").strip()
 
                 # value is on the next non-empty line
 
@@ -1257,13 +1799,21 @@ def main():
 
 
     # 组合选项格式: "一级分类 / 二级类型"，拆分出分类与类型（容忍空格差异）
+    # 支持英文表单组合（Product/SDK 等），映射为内部统一的中文分类与类型
     repo_type_combo = fields.get("仓库类型", "产品项目 / SDK")
+
+    repo_type_combo = normalize_repo_type_combo(repo_type_combo)
 
     repo_category, repo_type = parse_repo_type_combo(repo_type_combo)
 
     if not repo_type:
 
         repo_type = "SDK"
+
+    # 初始化语言（中英文表单均可选择）
+    lang_raw = (fields.get("初始化语言", "") or "").strip()
+
+    init_lang = "en" if lang_raw.lower().startswith("english") else "zh"
 
     repo_name = fields.get("仓库名称", "").strip().lower()
 
@@ -1418,9 +1968,9 @@ def main():
 
 
 
-    # init files
+    # init files（按语言选择模板）
 
-    readme = make_readme(repo_name, repo_type, license_name, description)
+    readme = make_readme(repo_name, repo_type, license_name, description, lang=init_lang)
 
     create_file(repo_name, "README.md", readme, "Init README")
 
@@ -1429,28 +1979,35 @@ def main():
     create_file(repo_name, ".github/workflows/ci.yml", CI_WORKFLOW, "Add CI workflow")
     create_file(repo_name, ".github/CODEOWNERS", CODEOWNERS_MD, "Add CODEOWNERS")
 
+    contributing_md = CONTRIBUTING_MD_EN if init_lang == "en" else CONTRIBUTING_MD
+    security_md = SECURITY_MD_EN if init_lang == "en" else SECURITY_MD
+    coc_md = COC_MD_EN if init_lang == "en" else COC_MD
+    bug_yaml = BUG_REPORT_YML_EN if init_lang == "en" else BUG_REPORT_YML
+    feature_yaml = FEATURE_YML_EN if init_lang == "en" else FEATURE_YML
+    pr_template = PR_TEMPLATE_EN if init_lang == "en" else PR_TEMPLATE
+
 
 
 
     if level in ("product", "sample"):
 
-        create_file(repo_name, "CONTRIBUTING.md", CONTRIBUTING_MD.format(name=repo_name), "Add contributing guide")
+        create_file(repo_name, "CONTRIBUTING.md", contributing_md.format(name=repo_name), "Add contributing guide")
 
     if level == "product":
 
-        create_file(repo_name, "SECURITY.md", SECURITY_MD, "Add security policy")
+        create_file(repo_name, "SECURITY.md", security_md, "Add security policy")
 
-        create_file(repo_name, "CODE_OF_CONDUCT.md", COC_MD, "Add code of conduct")
+        create_file(repo_name, "CODE_OF_CONDUCT.md", coc_md, "Add code of conduct")
 
     if level in ("product", "sample"):
 
-        create_file(repo_name, ".github/ISSUE_TEMPLATE/bug_report.yml", BUG_REPORT_YML, "Add bug template")
+        create_file(repo_name, ".github/ISSUE_TEMPLATE/bug_report.yml", bug_yaml, "Add bug template")
 
-        create_file(repo_name, ".github/ISSUE_TEMPLATE/feature_request.yml", FEATURE_YML, "Add feature template")
+        create_file(repo_name, ".github/ISSUE_TEMPLATE/feature_request.yml", feature_yaml, "Add feature template")
 
         create_file(repo_name, ".github/ISSUE_TEMPLATE/config.yml", CONFIG_YML, "Add issue config")
 
-        create_file(repo_name, ".github/PULL_REQUEST_TEMPLATE.md", PR_TEMPLATE, "Add PR template")
+        create_file(repo_name, ".github/PULL_REQUEST_TEMPLATE.md", pr_template, "Add PR template")
 
     if level == "product":
 

@@ -1,0 +1,146 @@
+name: " Create Repository Request (EN)"
+description: "Request to create a new repository under the huaweicloud organization (English)"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Create Repository Request
+        Request a new repository under the huaweicloud organization.
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Initialization Language
+      description: Choose the language for the repository initialization templates (README, CONTRIBUTING, etc.)
+      options:
+        - English
+        - 中文
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: repo_type
+    attributes:
+      label: Repository Type
+      description: Choose repository type (category / project), determines initialization level, license policy and README template
+      options:
+        - Product / SDK
+        - Product / Terraform Provider
+        - Product / GitHub Action
+        - Product / Framework Integration
+        - Product / Exporter / Plugin
+        - Product / IoT SDK
+        - Sample / Lab / Sample
+        - Documentation / Docs / Dataset
+        - Internal / Internal Config
+    validations:
+      required: true
+
+  - type: input
+    id: repo_name
+    attributes:
+      label: Repository Name
+      description: Lowercase letters, digits and hyphens, ≤100 chars, no leading/trailing hyphen, no consecutive hyphens
+      placeholder: my-awesome-sdk
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Repository Description
+      description: Briefly describe the purpose of the repository
+      placeholder: This repository is for...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: visibility
+    attributes:
+      label: Visibility
+      options:
+        - public
+        - private
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: license
+    attributes:
+      label: Open Source License
+      description: Only Product repositories use your choice; other categories are forced to Apache-2.0
+      options:
+        - Apache-2.0 (Recommended)
+        - MIT
+        - BSD-3-Clause
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: topics
+    attributes:
+      label: Topics Tags (at least 3)
+      description: Comma or newline separated; each tag must match [a-z0-9][a-z0-9.-]*
+      placeholder: "sdk, api, python"
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Repository Roles
+
+  - type: textarea
+    id: owner
+    attributes:
+      label: Owner (Admin, 1-2 people)
+      description: GitHub usernames with full admin access, strictly limited to 1-2 people, comma or newline separated
+      placeholder: alice, bob
+    validations:
+      required: true
+
+  - type: textarea
+    id: maintainer
+    attributes:
+      label: Maintainer (2-3 people)
+      description: GitHub usernames with maintain access, limited to 2-3 people, comma or newline separated
+      placeholder: charlie, dave
+    validations:
+      required: true
+
+  - type: textarea
+    id: writer
+    attributes:
+      label: Writer (Write access)
+      description: GitHub usernames with push access (optional), comma or newline separated
+      placeholder: eve, frank
+
+  - type: textarea
+    id: justification
+    attributes:
+      label: Justification
+      description: Why is this repository needed? What problem does it solve? Who are the target users?
+      placeholder: This repository is for...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Confirmation Checklist
+      options:
+        - label: Repository name follows naming rules (lowercase, digits, hyphens, ≤100 chars)
+          required: true
+        - label: I confirm no repository with the same name exists in the organization
+          required: true
+        - label: The Owner and Maintainer listed above are all organization members
+          required: true
+        - label: Owner count is limited to 1-2 people, Maintainer count to 2-3 people
+          required: true
+        - label: Topics tags are at least 3
+          required: true
+        - label: I understand the created repository will follow the organization's community governance standards
+          required: true

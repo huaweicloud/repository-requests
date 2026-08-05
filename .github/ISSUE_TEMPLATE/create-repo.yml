@@ -8,6 +8,18 @@ body:
         huaweicloud 组织仓库创建申请
 
   - type: dropdown
+    id: language
+    attributes:
+      label: 初始化语言
+      description: 选择仓库初始化模板的语言（README/CONTRIBUTING 等）
+      options:
+        - 中文
+        - English
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
     id: repo_type
     attributes:
       label: 仓库类型

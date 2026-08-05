@@ -79,12 +79,31 @@ def notify_feishu(repo_name, repo_type, repo_full, issue_number, author, descrip
 def parse_fields(body):
     lines = (body or "").split("\n")
     fields = {}
+    # 中英文字段前缀映射（key → 统一字段名）
+    prefix_map = [
+        ("### 初始化语言", "初始化语言"),
+        ("### Initialization Language", "初始化语言"),
+        ("### 仓库类型", "仓库类型"),
+        ("### Repository Type", "仓库类型"),
+        ("### 仓库名称", "仓库名称"),
+        ("### Repository Name", "仓库名称"),
+        ("### 仓库描述", "仓库描述"),
+        ("### Repository Description", "仓库描述"),
+        ("### 可见性", "可见性"),
+        ("### Visibility", "可见性"),
+        ("### 开源许可证", "开源许可证"),
+        ("### Open Source License", "开源许可证"),
+        ("### Topics 标签", "Topics 标签"),
+        ("### Topics Tags", "Topics 标签"),
+        ("### Owner", "Owner"),
+        ("### Maintainer", "Maintainer"),
+        ("### Writer", "Writer"),
+        ("### 申请理由", "申请理由"),
+        ("### Justification", "申请理由"),
+    ]
     for i, line in enumerate(lines):
-        for prefix in ["### 仓库类型", "### 仓库名称", "### 仓库描述", "### 可见性",
-                        "### 开源许可证", "### Topics 标签", "### Owner", "### Maintainer",
-                        "### Writer", "### 申请理由"]:
+        for prefix, key in prefix_map:
             if line.startswith(prefix):
-                key = prefix.replace("### ", "").strip()
                 for j in range(i + 1, min(i + 3, len(lines))):
                     val = lines[j].strip()
                     if val.startswith("_No response_"):
@@ -117,8 +136,30 @@ CATEGORY_TYPES = {
 }
 
 
+def normalize_repo_type_combo(combo):
+    """将英文表单的组合选项映射为内部统一的中文组合。"""
+    combo = (combo or "").strip()
+    mapping = [
+        ("Product / SDK", "产品项目 / SDK"),
+        ("Product / Terraform Provider", "产品项目 / Terraform Provider"),
+        ("Product / GitHub Action", "产品项目 / GitHub Action"),
+        ("Product / Framework Integration", "产品项目 / 框架集成"),
+        ("Product / Exporter / Plugin", "产品项目 / Exporter / Plugin"),
+        ("Product / IoT SDK", "产品项目 / IoT SDK"),
+        ("Sample / Lab / Sample", "示例教程 / 示例 / Lab / Sample"),
+        ("Documentation / Docs / Dataset", "文档数据 / 文档 / 数据集"),
+        ("Internal / Internal Config", "内部配置 / 内部配置"),
+    ]
+    norm = combo.replace(" ", "")
+    for en, zh in mapping:
+        if norm == en.replace(" ", ""):
+            return zh
+    return combo
+
+
 def parse_repo_type_combo(combo):
     """拆分组合选项 '一级分类 / 二级类型'，容忍有无空格差异。"""
+    combo = normalize_repo_type_combo(combo)
     combo = (combo or "").strip()
     for cat in CATEGORY_TYPES:
         if combo.startswith(cat):
