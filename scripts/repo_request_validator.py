@@ -152,8 +152,12 @@ def main():
     maintainers = split_users(maint_str)
     if not owners:
         errors.append("- Owner（管理员）至少 1 人")
-    if not maintainers:
-        errors.append("- Maintainer（维护者）至少 1 人")
+    elif len(owners) > 2:
+        errors.append(f"- Owner（管理员）严格控制在 1-2 人（当前 {len(owners)} 人）")
+    if len(maintainers) < 2:
+        errors.append("- Maintainer（维护者）控制在 2-3 人（当前不足 2 人）")
+    elif len(maintainers) > 3:
+        errors.append(f"- Maintainer（维护者）控制在 2-3 人（当前 {len(maintainers)} 人）")
 
     comment_path = f"/repos/{repo_full}/issues/{number}/comments"
 

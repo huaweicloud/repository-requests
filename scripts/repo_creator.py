@@ -1283,6 +1283,30 @@ def main():
 
         sys.exit(1)
 
+    # 角色人数校验：Owner 1-2 人，Maintainer 2-3 人
+    owners = [u.strip() for u in re.split(r'[,\n]+', owner_str) if u.strip()]
+    maintainers = [u.strip() for u in re.split(r'[,\n]+', maintainer_str) if u.strip()]
+    if not owners:
+        api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/comments", "gh",
+            {"body": "  **Owner 缺失**：Owner（管理员）至少 1 人"})
+        print("FAIL: owner < 1")
+        sys.exit(1)
+    if len(owners) > 2:
+        api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/comments", "gh",
+            {"body": f"  **Owner 超配**：Owner（管理员）严格控制在 1-2 人（当前 {len(owners)} 人）"})
+        print(f"FAIL: owner > 2 (got {len(owners)})")
+        sys.exit(1)
+    if len(maintainers) < 2:
+        api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/comments", "gh",
+            {"body": "  **Maintainer 不足**：Maintainer（维护者）控制在 2-3 人（当前不足 2 人）"})
+        print("FAIL: maintainer < 2")
+        sys.exit(1)
+    if len(maintainers) > 3:
+        api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/comments", "gh",
+            {"body": f"  **Maintainer 超配**：Maintainer（维护者）控制在 2-3 人（当前 {len(maintainers)} 人）"})
+        print(f"FAIL: maintainer > 3 (got {len(maintainers)})")
+        sys.exit(1)
+
 
 
     # check duplicate
@@ -1421,10 +1445,6 @@ def main():
 
 
     # roles
-
-    owners = [u.strip() for u in re.split(r'[,\n]+', owner_str) if u.strip()]
-
-    maintainers = [u.strip() for u in re.split(r'[,\n]+', maintainer_str) if u.strip()]
 
     writers = [u.strip() for u in re.split(r'[,\n]+', writer_str) if u.strip()]
 

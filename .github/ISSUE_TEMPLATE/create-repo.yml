@@ -84,8 +84,8 @@ body:
   - type: textarea
     id: owner
     attributes:
-      label: Owner（管理员，≥1 人）
-      description: 拥有仓库完整管理权限的 GitHub 用户名，逗号或换行分隔
+      label: Owner（管理员，1-2 人）
+      description: 拥有仓库完整管理权限的 GitHub 用户名，严格控制在 1-2 人，逗号或换行分隔
       placeholder: alice, bob
     validations:
       required: true
@@ -93,8 +93,8 @@ body:
   - type: textarea
     id: maintainer
     attributes:
-      label: Maintainer（维护者，≥1 人）
-      description: 拥有维护权限的 GitHub 用户名，逗号或换行分隔
+      label: Maintainer（维护者，2-3 人）
+      description: 拥有维护权限的 GitHub 用户名，控制在 2-3 人，逗号或换行分隔
       placeholder: charlie, dave
     validations:
       required: true
@@ -125,6 +125,8 @@ body:
         - label: 我已确认组织内不存在同名仓库
           required: true
         - label: 以上填写的 Owner 和 Maintainer 均为组织成员
+          required: true
+        - label: Owner（管理员）人数控制在 1-2 人，Maintainer（维护者）人数控制在 2-3 人
           required: true
         - label: Topics 标签不少于 3 个
           required: true
