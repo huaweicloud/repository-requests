@@ -590,7 +590,7 @@ SECURITY_MD = """# Security Policy
 
 ## 报告安全漏洞
 
-如发现安全漏洞，请发送邮件至 security@huaweicloud.dev，**不要在公开 Issue 中披露**。
+如发现安全漏洞，请发送邮件至 huaweicloud@huawei.com，**不要在公开 Issue 中披露**。
 
 
 
