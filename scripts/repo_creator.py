@@ -150,9 +150,12 @@ def gitcode_api(method, path, data=None):
 
 
 
-def create_gitcode_repo(repo_name, description):
+def create_gitcode_repo(repo_name, description, private=False):
 
-    """在 GitCode 上创建同名仓库（v5 API）"""
+    """在 GitCode 上创建同名仓库（v5 API），元数据与 GitHub 保持一致。
+
+    若仓库已存在则用 PATCH 更新元数据（描述、可见性），确保两边一致。
+    """
 
     data = {
 
@@ -162,7 +165,7 @@ def create_gitcode_repo(repo_name, description):
 
         "description": description or "",
 
-        "private": False,
+        "private": private,
 
     }
 
@@ -175,6 +178,23 @@ def create_gitcode_repo(repo_name, description):
         print(f"GitCode repo created: {gitcode_url}")
 
         return gitcode_url
+
+    # 仓库可能已存在 → 更新元数据保持一致
+    existing = gitcode_api("GET", f"/repos/{GITCODE_ORG}/{repo_name}")
+
+    if existing and "id" in existing:
+
+        patch = {"description": description or "", "private": private}
+
+        updated = gitcode_api("PATCH", f"/repos/{GITCODE_ORG}/{repo_name}", patch)
+
+        if updated and "id" in updated:
+
+            gitcode_url = updated.get("html_url", f"https://gitcode.com/{GITCODE_ORG}/{repo_name}")
+
+            print(f"GitCode repo metadata updated: {gitcode_url}")
+
+            return gitcode_url
 
     print(f"Failed to create GitCode repo")
 
@@ -1428,9 +1448,8 @@ def main():
 
 
 
-    # create GitCode mirror
-
-    gitcode_url = create_gitcode_repo(repo_name, description)
+    # create GitCode mirror (metadata consistent with GitHub)
+    gitcode_url = create_gitcode_repo(repo_name, description, private=(visibility == "private"))
 
 
 
