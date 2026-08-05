@@ -1,0 +1,22 @@
+name: Approve Repo Request
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to approve'
+        required: true
+        type: string
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Approve
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: |
+          gh issue edit ${{ inputs.issue_number }} \
+            -R ${{ github.repository }} \
+            --add-label "status/approved"
+          echo "Approved issue #${{ inputs.issue_number }}"

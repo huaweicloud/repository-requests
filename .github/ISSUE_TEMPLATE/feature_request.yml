@@ -1,0 +1,87 @@
+﻿name: Feature Request
+description: 💡 提�
+�一个功能建议
+title: "[Feature]: "
+labe
+ls: ["type/enhancement", "agent/needs-triage"
+]
+body:
+  - type: markdown
+    attributes:
+  
+    value: |
+        感谢你提出功能建
+议！请描述你的使用场景和期望的
+功能。
+
+  - type: textarea
+    id: problem
+
+    attributes:
+      label: 问题/需求�
+�述
+      description: 这个功能要解决
+什么问题？请描述你的使用场景。
+
+      placeholder: "当我想...的时候，
+目前无法..."
+    validations:
+      requi
+red: true
+
+  - type: textarea
+    id: solutio
+n
+    attributes:
+      label: 建议的解�
+�方案
+      description: 你期望的功能
+是什么样的？
+      placeholder: "希望
+可以..."
+    validations:
+      required: t
+rue
+
+  - type: textarea
+    id: alternatives
+
+    attributes:
+      label: 替代方案
+   
+   description: 你考虑过哪些替代方�
+�或变通方法？
+    validations:
+      re
+quired: false
+
+  - type: checkboxes
+    id: c
+hecks
+    attributes:
+      label: 提交前�
+��认
+      options:
+        - label: 我已�
+��索已有 Issue，确认没有重复的功�
+��请求
+          required: true
+        - l
+abel: 这个功能对多个用户有普遍价
+值（不是个人定制需求）
+          r
+equired: false
+
+  - type: textarea
+    id: ad
+ditional
+    attributes:
+      label: 附加�
+��息
+      description: 任何有助于理�
+�需求的信息、截图、参考链接等
+ 
+   validations:
+      required: false
+
+

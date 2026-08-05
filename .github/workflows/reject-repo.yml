@@ -1,0 +1,32 @@
+name: Reject Repo Request
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to reject'
+        required: true
+        type: string
+      reason:
+        description: 'Rejection reason'
+        required: true
+        type: string
+
+jobs:
+  reject:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - name: Reject
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          REASON: ${{ inputs.reason }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" -R "${{ github.repository }}" \
+            --body "您的建仓申请已被拒绝，原因如下：$REASON"
+          gh issue edit "$ISSUE_NUMBER" -R "${{ github.repository }}" \
+            --add-label "status/declined"
+          echo "Rejected issue #$ISSUE_NUMBER"

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 组织仓库列表
+    url: https://github.com/orgs/huaweicloud/repositories
+    about: 查看组织下已有的仓库列表
+  - name: 💬 讨论区
+    url: https://github.com/orgs/huaweicloud/discussions
+    about: 关于建仓流程的问题请在此讨论
