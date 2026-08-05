@@ -1215,7 +1215,7 @@ def main():
 
     for i, line in enumerate(lines):
 
-        for prefix in ["### 仓库类型（一级）", "### 项目类型（二级）", "### 仓库名称", "### 仓库描述", "### 可见性",
+        for prefix in ["### 仓库类型", "### 仓库名称", "### 仓库描述", "### 可见性",
 
                         "### 开源许可证", "### Topics 标签", "### Owner", "### Maintainer",
 
@@ -1241,9 +1241,14 @@ def main():
 
 
 
-    repo_category = fields.get("仓库类型（一级）", "")
+    # 组合选项格式: "一级分类 / 二级类型"，拆分出分类与类型
+    repo_type_combo = fields.get("仓库类型", "产品项目 / SDK")
 
-    repo_type = fields.get("项目类型（二级）", "SDK")
+    repo_category, _, repo_type = repo_type_combo.partition(" / ")
+
+    repo_category = repo_category.strip()
+
+    repo_type = (repo_type.strip() or "SDK")
 
     repo_name = fields.get("仓库名称", "").strip().lower()
 
