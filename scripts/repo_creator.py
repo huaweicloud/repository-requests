@@ -1608,6 +1608,8 @@ def setup_repo_secrets(repo):
         secrets_map = {}
         if BOT_TOKEN:
             secrets_map["BOT_TOKEN"] = BOT_TOKEN
+        if GITCODE_TOKEN:
+            secrets_map["GITCODE_TOKEN"] = GITCODE_TOKEN
 
         for name, value in secrets_map.items():
             # 获取仓库 public key
