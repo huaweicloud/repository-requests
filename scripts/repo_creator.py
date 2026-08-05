@@ -66,6 +66,14 @@ DOCS_TYPES = ["文档 / 数据集"]
 
 INTERNAL_TYPES = ["内部配置"]
 
+# 一级分类 → 允许的二级类型
+CATEGORY_TYPES = {
+    "产品项目": PRODUCT_TYPES,
+    "示例教程": SAMPLE_TYPES,
+    "文档数据": DOCS_TYPES,
+    "内部配置": INTERNAL_TYPES,
+}
+
 
 
 
@@ -206,9 +214,9 @@ def create_gitcode_repo(repo_name, description, private=False):
 
 # ─── 许可证策略 ───
 
-def get_license(repo_type, user_choice):
+def get_license(repo_category, user_choice):
 
-    if repo_type in PRODUCT_TYPES:
+    if repo_category == "产品项目":
 
         choice_map = {"Apache-2.0（推荐）": "Apache-2.0", "Apache-2.0": "Apache-2.0", "MIT": "MIT", "BSD-3-Clause": "BSD-3-Clause"}
 
@@ -1147,17 +1155,19 @@ def notify_feishu(repo_name, repo_type, url, author, gitcode_url=None):
 
 
 
-def get_init_level(repo_type):
+def get_init_level(repo_category):
 
-    if repo_type in PRODUCT_TYPES:
+    """根据一级分类确定初始化等级"""
+
+    if repo_category == "产品项目":
 
         return "product"
 
-    elif repo_type in SAMPLE_TYPES:
+    elif repo_category == "示例教程":
 
         return "sample"
 
-    elif repo_type in DOCS_TYPES:
+    elif repo_category == "文档数据":
 
         return "docs"
 
@@ -1205,7 +1215,7 @@ def main():
 
     for i, line in enumerate(lines):
 
-        for prefix in ["### 仓库类型", "### 仓库名称", "### 仓库描述", "### 可见性",
+        for prefix in ["### 仓库类型（一级）", "### 项目类型（二级）", "### 仓库名称", "### 仓库描述", "### 可见性",
 
                         "### 开源许可证", "### Topics 标签", "### Owner", "### Maintainer",
 
@@ -1231,7 +1241,9 @@ def main():
 
 
 
-    repo_type = fields.get("仓库类型", "SDK")
+    repo_category = fields.get("仓库类型（一级）", "")
+
+    repo_type = fields.get("项目类型（二级）", "SDK")
 
     repo_name = fields.get("仓库名称", "").strip().lower()
 
@@ -1267,6 +1279,19 @@ def main():
 
         print(f"FAIL: invalid repo name '{repo_name}'")
 
+        sys.exit(1)
+
+    # 一级分类与二级类型匹配校验
+    if repo_category not in CATEGORY_TYPES:
+        api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/comments", "gh",
+            {"body": f"  **仓库类型（一级）无效**：`{repo_category}` 必须是 产品项目/示例教程/文档数据/内部配置 之一"})
+        print(f"FAIL: invalid category '{repo_category}'")
+        sys.exit(1)
+    if repo_type not in CATEGORY_TYPES[repo_category]:
+        allowed = ", ".join(CATEGORY_TYPES[repo_category])
+        api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/comments", "gh",
+            {"body": f"  **类型不匹配**：一级分类 `{repo_category}` 应搭配二级类型（{allowed}），当前选择了 `{repo_type}`"})
+        print(f"FAIL: category '{repo_category}' does not match type '{repo_type}'")
         sys.exit(1)
 
 
@@ -1325,9 +1350,9 @@ def main():
 
 
 
-    license_name = get_license(repo_type, license_choice)
+    license_name = get_license(repo_category, license_choice)
 
-    level = get_init_level(repo_type)
+    level = get_init_level(repo_category)
 
 
 

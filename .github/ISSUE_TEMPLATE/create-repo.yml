@@ -8,10 +8,23 @@ body:
         huaweicloud 组织仓库创建申请
 
   - type: dropdown
+    id: repo_category
+    attributes:
+      label: 仓库类型（一级）
+      description: 选择仓库类型分类，决定初始化等级和许可证策略
+      options:
+        - 产品项目
+        - 示例教程
+        - 文档数据
+        - 内部配置
+    validations:
+      required: true
+
+  - type: dropdown
     id: repo_type
     attributes:
-      label: 仓库类型
-      description: 选择仓库类型，决定初始化文件数量和模板
+      label: 项目类型（二级）
+      description: 选择具体项目类型，决定 README 模板；需与一级分类匹配
       options:
         - SDK
         - Terraform Provider

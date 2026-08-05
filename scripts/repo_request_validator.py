@@ -80,7 +80,7 @@ def parse_fields(body):
     lines = (body or "").split("\n")
     fields = {}
     for i, line in enumerate(lines):
-        for prefix in ["### 仓库类型", "### 仓库名称", "### 仓库描述", "### 可见性",
+        for prefix in ["### 仓库类型（一级）", "### 项目类型（二级）", "### 仓库名称", "### 仓库描述", "### 可见性",
                         "### 开源许可证", "### Topics 标签", "### Owner", "### Maintainer",
                         "### Writer", "### 申请理由"]:
             if line.startswith(prefix):
@@ -126,7 +126,8 @@ def main():
 
     fields = parse_fields(body)
     repo_name = fields.get("仓库名称", "").strip().lower()
-    repo_type = fields.get("仓库类型", "")
+    repo_category = fields.get("仓库类型（一级）", "")
+    repo_type = fields.get("项目类型（二级）", "")
     topics_raw = fields.get("Topics 标签", "")
     owner_str = fields.get("Owner", "")
     maint_str = fields.get("Maintainer", "")
@@ -138,11 +139,19 @@ def main():
     elif not validate_repo_name(repo_name):
         errors.append(f"- 仓库名称 `{repo_name}` 不符合规范（小写字母+数字+连字符，≤100字符，不以连字符开头/结尾）")
 
-    valid_types = ["SDK", "Terraform Provider", "GitHub Action", "框架集成",
-                   "Exporter / Plugin", "IoT SDK", "示例 / Lab / Sample",
-                   "文档 / 数据集", "内部配置"]
-    if repo_type and repo_type not in valid_types:
-        errors.append(f"- 仓库类型 `{repo_type}` 无效，可选: {', '.join(valid_types)}")
+    category_types = {
+        "产品项目": ["SDK", "Terraform Provider", "GitHub Action", "框架集成", "Exporter / Plugin", "IoT SDK"],
+        "示例教程": ["示例 / Lab / Sample"],
+        "文档数据": ["文档 / 数据集"],
+        "内部配置": ["内部配置"],
+    }
+    if repo_category not in category_types:
+        errors.append(f"- 仓库类型（一级）`{repo_category}` 无效，可选: 产品项目 / 示例教程 / 文档数据 / 内部配置")
+    elif not repo_type:
+        errors.append("- 项目类型（二级）不能为空")
+    elif repo_type not in category_types[repo_category]:
+        allowed = ", ".join(category_types[repo_category])
+        errors.append(f"- 类型不匹配：一级分类 `{repo_category}` 应搭配二级类型（{allowed}），当前选择了 `{repo_type}`")
 
     topics = validate_topics(topics_raw)
     if len(topics) < 3:
