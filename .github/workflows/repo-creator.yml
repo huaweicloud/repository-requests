@@ -21,6 +21,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install dependencies
+        run: pip install pynacl
+
       - name: Run Repository Creator Bot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

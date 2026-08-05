@@ -1595,6 +1595,44 @@ def enable_security(repo, level):
 
 
 
+def setup_repo_secrets(repo):
+    """为新仓库配置仓库级 secrets（BOT_TOKEN 等），确保注入的 workflow 可访问。
+
+    组织级 secret 对新建仓库传播有延迟/限制，因此建仓时显式写入仓库级 secrets。
+    使用 GitHub Actions secrets 加密流程（公钥 + nacl sealed box）。
+    """
+    try:
+        import base64
+        from nacl import encoding, public
+
+        secrets_map = {}
+        if BOT_TOKEN:
+            secrets_map["BOT_TOKEN"] = BOT_TOKEN
+
+        for name, value in secrets_map.items():
+            # 获取仓库 public key
+            key_data = api("GET", f"/repos/{ORG}/{repo}/actions/secrets/public-key", "bot")
+            if not key_data or "key" not in key_data:
+                print(f"[{repo}] Failed to get public key for secret {name}")
+                continue
+            pub_key_b64 = key_data["key"]
+            key_id = key_data["key_id"]
+
+            # 用 nacl sealed box 加密
+            pub_key = public.PublicKey(pub_key_b64, encoding.Base64Encoder())
+            sealed_box = public.SealedBox(pub_key)
+            encrypted = sealed_box.encrypt(value.encode("utf-8"))
+            enc_b64 = base64.b64encode(encrypted).decode("utf-8")
+
+            result = api("PUT", f"/repos/{ORG}/{repo}/actions/secrets/{name}", "bot",
+                         {"encrypted_value": enc_b64, "key_id": key_id})
+            print(f"[{repo}] Secret {name} configured")
+    except Exception as e:
+        print(f"[{repo}] setup_repo_secrets failed: {e}")
+
+
+
+
 
 def validate_repo_name(name):
 
@@ -2073,6 +2111,9 @@ def main():
     # security alerts + auto-fix
 
     enable_security(repo_name, level)
+
+    # 配置仓库级 secrets（BOT_TOKEN），确保 triage 等 workflow 可访问 .github action
+    setup_repo_secrets(repo_name)
 
 
 
