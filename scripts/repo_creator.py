@@ -75,6 +75,21 @@ CATEGORY_TYPES = {
 }
 
 
+def parse_repo_type_combo(combo):
+    """拆分组合选项 '一级分类 / 二级类型'，容忍有无空格差异。
+
+    返回 (category, type)；无法识别时返回 (None, combo)。
+    """
+    combo = (combo or "").strip()
+    for cat in CATEGORY_TYPES:
+        if combo.startswith(cat):
+            rest = combo[len(cat):].lstrip(" /　").strip()
+            if rest:
+                return cat, rest
+            return cat, CATEGORY_TYPES[cat][0]
+    return None, combo
+
+
 
 
 
@@ -1241,14 +1256,14 @@ def main():
 
 
 
-    # 组合选项格式: "一级分类 / 二级类型"，拆分出分类与类型
+    # 组合选项格式: "一级分类 / 二级类型"，拆分出分类与类型（容忍空格差异）
     repo_type_combo = fields.get("仓库类型", "产品项目 / SDK")
 
-    repo_category, _, repo_type = repo_type_combo.partition(" / ")
+    repo_category, repo_type = parse_repo_type_combo(repo_type_combo)
 
-    repo_category = repo_category.strip()
+    if not repo_type:
 
-    repo_type = (repo_type.strip() or "SDK")
+        repo_type = "SDK"
 
     repo_name = fields.get("仓库名称", "").strip().lower()
 
@@ -1286,13 +1301,13 @@ def main():
 
         sys.exit(1)
 
-    # 一级分类与二级类型匹配校验
+    # 一级分类与二级类型匹配校验（容忍空格差异）
     if repo_category not in CATEGORY_TYPES:
         api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/comments", "gh",
             {"body": f"  **仓库类型（一级）无效**：`{repo_category}` 必须是 产品项目/示例教程/文档数据/内部配置 之一"})
         print(f"FAIL: invalid category '{repo_category}'")
         sys.exit(1)
-    if repo_type not in CATEGORY_TYPES[repo_category]:
+    if repo_type.replace(" ", "") not in [t.replace(" ", "") for t in CATEGORY_TYPES[repo_category]]:
         allowed = ", ".join(CATEGORY_TYPES[repo_category])
         api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/comments", "gh",
             {"body": f"  **类型不匹配**：一级分类 `{repo_category}` 应搭配二级类型（{allowed}），当前选择了 `{repo_type}`"})

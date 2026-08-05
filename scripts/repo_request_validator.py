@@ -109,6 +109,26 @@ def split_users(raw):
     return [u.strip() for u in re.split(r'[,\n]+', raw) if u.strip()]
 
 
+CATEGORY_TYPES = {
+    "产品项目": ["SDK", "Terraform Provider", "GitHub Action", "框架集成", "Exporter / Plugin", "IoT SDK"],
+    "示例教程": ["示例 / Lab / Sample"],
+    "文档数据": ["文档 / 数据集"],
+    "内部配置": ["内部配置"],
+}
+
+
+def parse_repo_type_combo(combo):
+    """拆分组合选项 '一级分类 / 二级类型'，容忍有无空格差异。"""
+    combo = (combo or "").strip()
+    for cat in CATEGORY_TYPES:
+        if combo.startswith(cat):
+            rest = combo[len(cat):].lstrip(" /　").strip()
+            if rest:
+                return cat, rest
+            return cat, CATEGORY_TYPES[cat][0]
+    return None, combo
+
+
 def main():
     event_path = os.environ.get("GITHUB_EVENT_PATH", "")
     with open(event_path) as f:
@@ -131,10 +151,8 @@ def main():
     owner_str = fields.get("Owner", "")
     maint_str = fields.get("Maintainer", "")
 
-    # 组合选项拆分: "一级分类 / 二级类型"
-    repo_category, _, repo_type = repo_type_combo.partition(" / ")
-    repo_category = repo_category.strip()
-    repo_type = repo_type.strip()
+    # 组合选项拆分: "一级分类 / 二级类型"（容忍空格差异）
+    repo_category, repo_type = parse_repo_type_combo(repo_type_combo)
 
     errors = []
 
@@ -143,16 +161,10 @@ def main():
     elif not validate_repo_name(repo_name):
         errors.append(f"- 仓库名称 `{repo_name}` 不符合规范（小写字母+数字+连字符，≤100字符，不以连字符开头/结尾）")
 
-    category_types = {
-        "产品项目": ["SDK", "Terraform Provider", "GitHub Action", "框架集成", "Exporter / Plugin", "IoT SDK"],
-        "示例教程": ["示例 / Lab / Sample"],
-        "文档数据": ["文档 / 数据集"],
-        "内部配置": ["内部配置"],
-    }
-    if repo_category not in category_types:
+    if repo_category not in CATEGORY_TYPES:
         errors.append(f"- 仓库类型 `{repo_type_combo}` 无效，可选组合: 产品项目/SDK、产品项目/Terraform Provider、产品项目/GitHub Action、产品项目/框架集成、产品项目/Exporter/Plugin、产品项目/IoT SDK、示例教程/示例/Lab/Sample、文档数据/文档/数据集、内部配置/内部配置")
-    elif repo_type not in category_types[repo_category]:
-        allowed = ", ".join(category_types[repo_category])
+    elif repo_type.replace(" ", "") not in [t.replace(" ", "") for t in CATEGORY_TYPES[repo_category]]:
+        allowed = ", ".join(CATEGORY_TYPES[repo_category])
         errors.append(f"- 类型不匹配：分类 `{repo_category}` 应搭配二级类型（{allowed}），当前选择了 `{repo_type}`")
 
     topics = validate_topics(topics_raw)
