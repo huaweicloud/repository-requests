@@ -11,7 +11,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    if: contains(github.event.issue.body, '### 仓库名称')
+    if: contains(github.event.issue.body, '### 仓库名称') || contains(github.event.issue.body, '### Repository Name') || contains(github.event.issue.body, '### Repository Type')
     steps:
       - uses: actions/checkout@v4
 

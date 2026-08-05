@@ -180,8 +180,9 @@ def main():
     body = issue.get("body", "")
     repo_full = event.get("repository", {}).get("full_name", "")
 
-    # only process repo creation requests
-    if "### 仓库名称" not in (body or ""):
+    # only process repo creation requests (中英文表单)
+    body_text = body or ""
+    if not any(k in body_text for k in ["### 仓库名称", "### Repository Name", "### Repository Type"]):
         print(f"Issue #{number}: not a repo creation request, skip validation")
         return
 
