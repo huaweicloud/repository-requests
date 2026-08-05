@@ -20,7 +20,7 @@ jobs:
           repository: ${{ github.repository_owner }}/.github
           path: .github-repo
           ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
