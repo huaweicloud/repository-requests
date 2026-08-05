@@ -1347,11 +1347,41 @@ jobs:
 
     steps:
 
-      - uses: huaweicloud/.github/actions/issue-bot@main
+      - name: Checkout .github org repo
+
+        uses: actions/checkout@v4
+
+        with:
+
+          repository: ${{ github.repository_owner }}/.github
+
+          path: .github-repo
+
+          ref: main
+
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Set up Python
+
+        uses: actions/setup-python@v5
+
+        with:
+
+          python-version: '3.12'
+
+      - name: Run Issue Bot
 
         env:
 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
+        run: python3 .github-repo/actions/issue-bot/issue_bot.py
 
 """
 
