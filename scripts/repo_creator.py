@@ -755,7 +755,7 @@ jobs:
 """
 
 CODEOWNERS_MD = """# CODEOWNERS - auto-assign PR reviewers
-* @shuangheaven
+* @huaweiclouddev
 """
 
 TRIAGE_WORKFLOW = """name: Issue Triage
