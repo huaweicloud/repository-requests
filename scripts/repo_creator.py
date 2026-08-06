@@ -1886,7 +1886,8 @@ def main():
     fields = {}
 
     # 中英文字段前缀映射（key → 统一字段名）
-    prefix_map = [
+    # 注意：长前缀优先（如 "### Owner 邮箱" 必须先于 "### Owner" 匹配）
+    prefix_map = sorted([
         ("### 初始化语言", "初始化语言"),
         ("### Initialization Language", "初始化语言"),
         ("### 仓库类型", "仓库类型"),
@@ -1901,18 +1902,18 @@ def main():
         ("### Open Source License", "开源许可证"),
         ("### Topics 标签", "Topics 标签"),
         ("### Topics Tags", "Topics 标签"),
-        ("### Owner", "Owner"),
-        ("### Maintainer", "Maintainer"),
-        ("### Writer", "Writer"),
-        ("### 申请理由", "申请理由"),
-        ("### Justification", "申请理由"),
         ("### Owner 邮箱", "Owner 邮箱"),
         ("### Owner Email", "Owner 邮箱"),
         ("### Maintainer 邮箱", "Maintainer 邮箱"),
         ("### Maintainer Email", "Maintainer 邮箱"),
         ("### 飞书 open_id", "飞书 open_id"),
         ("### Feishu open_id", "飞书 open_id"),
-    ]
+        ("### Owner", "Owner"),
+        ("### Maintainer", "Maintainer"),
+        ("### Writer", "Writer"),
+        ("### 申请理由", "申请理由"),
+        ("### Justification", "申请理由"),
+    ], key=lambda x: len(x[0]), reverse=True)
 
     for i, line in enumerate(lines):
 
@@ -1924,7 +1925,7 @@ def main():
                 vals = []
                 for j in range(i + 1, len(lines)):
                     nxt = lines[j].strip()
-                    if nxt.startswith("###"):
+                    if nxt.startswith("#"):
                         break
                     if nxt == "_No response_":
                         continue
