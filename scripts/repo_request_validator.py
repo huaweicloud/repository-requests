@@ -104,13 +104,17 @@ def parse_fields(body):
     for i, line in enumerate(lines):
         for prefix, key in prefix_map:
             if line.startswith(prefix):
-                for j in range(i + 1, min(i + 3, len(lines))):
-                    val = lines[j].strip()
-                    if val.startswith("_No response_"):
-                        val = ""
-                    if val and not val.startswith("###") and not val.startswith("_"):
-                        fields[key] = val
+                # 读取标题后直到下一个 ### 标题之间的所有非空行，拼接为字段值
+                vals = []
+                for j in range(i + 1, len(lines)):
+                    nxt = lines[j].strip()
+                    if nxt.startswith("###"):
                         break
+                    if nxt == "_No response_":
+                        continue
+                    if nxt:
+                        vals.append(nxt)
+                fields[key] = "\n".join(vals) if vals else ""
                 break
     return fields
 
