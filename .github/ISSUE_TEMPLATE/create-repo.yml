@@ -111,35 +111,6 @@ body:
     validations:
       required: true
 
-  - type: markdown
-    attributes:
-      value: |
-        ## 通知配置
-        新仓库的 Issue 创建后，将通知仓库负责人。请填写以下通知信息（用于飞书卡片 / 邮件提醒）：
-
-  - type: textarea
-    id: owner_email
-    attributes:
-      label: Owner 邮箱（至少 1 个）
-      description: 仓库 Owner 的邮箱，逗号或换行分隔；用于接收 Issue 通知邮件
-      placeholder: alice@example.com, bob@example.com
-    validations:
-      required: true
-
-  - type: textarea
-    id: maintainer_email
-    attributes:
-      label: Maintainer 邮箱（可选）
-      description: 仓库 Maintainer 的邮箱（可选），逗号或换行分隔
-      placeholder: charlie@example.com
-
-  - type: textarea
-    id: feishu_open_id
-    attributes:
-      label: 飞书 open_id（可选）
-      description: 接收飞书 Issue 通知的 open_id，逗号或换行分隔（可联系管理员获取）
-      placeholder: ou_xxxxxxxxxxxxxxxx
-
   - type: textarea
     id: writer
     attributes:

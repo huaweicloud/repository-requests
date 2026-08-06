@@ -111,35 +111,6 @@ body:
     validations:
       required: true
 
-  - type: markdown
-    attributes:
-      value: |
-        ## Notification Settings
-        Repository owners will be notified when a new Issue is created. Please provide the following contact info (for Feishu card / email reminders):
-
-  - type: textarea
-    id: owner_email
-    attributes:
-      label: Owner Email (at least 1)
-      description: Emails of repository Owners, comma or newline separated; used for Issue notification emails
-      placeholder: alice@example.com, bob@example.com
-    validations:
-      required: true
-
-  - type: textarea
-    id: maintainer_email
-    attributes:
-      label: Maintainer Email (optional)
-      description: Emails of repository Maintainers (optional), comma or newline separated
-      placeholder: charlie@example.com
-
-  - type: textarea
-    id: feishu_open_id
-    attributes:
-      label: Feishu open_id (optional)
-      description: open_id(s) to receive Feishu Issue notifications, comma or newline separated (contact admin to obtain)
-      placeholder: ou_xxxxxxxxxxxxxxxx
-
   - type: textarea
     id: writer
     attributes:

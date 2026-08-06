@@ -1381,22 +1381,6 @@ jobs:
 
           GITHUB_REPOSITORY: ${{ github.repository }}
 
-          OWNER_USERS: ${{ secrets.OWNER_USERS }}
-
-          MAINTAINER_USERS: ${{ secrets.MAINTAINER_USERS }}
-
-          OWNER_EMAILS: ${{ secrets.OWNER_EMAILS }}
-
-          MAINTAINER_EMAILS: ${{ secrets.MAINTAINER_EMAILS }}
-
-          FEISHU_OPEN_IDS: ${{ secrets.FEISHU_OPEN_IDS }}
-
-          FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
-
-          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
-
-          FEISHU_ADMIN_OPEN_ID: ${{ secrets.FEISHU_ADMIN_OPEN_ID }}
-
         run: python3 .github-repo/actions/issue-bot/issue_bot.py
 
 """
@@ -1611,9 +1595,8 @@ def enable_security(repo, level):
 
 
 
-def setup_repo_secrets(repo, owner_email_str="", maintainer_email_str="", feishu_open_id_str="",
-                       owner_str="", maintainer_str=""):
-    """为新仓库配置仓库级 secrets（BOT_TOKEN 等 + 负责人通知配置），确保注入的 workflow 可访问。
+def setup_repo_secrets(repo):
+    """为新仓库配置仓库级 secrets（BOT_TOKEN 等），确保注入的 workflow 可访问。
 
     组织级 secret 对新建仓库传播有延迟/限制，因此建仓时显式写入仓库级 secrets。
     使用 GitHub Actions secrets 加密流程（公钥 + nacl sealed box）。
@@ -1627,17 +1610,6 @@ def setup_repo_secrets(repo, owner_email_str="", maintainer_email_str="", feishu
             secrets_map["BOT_TOKEN"] = BOT_TOKEN
         if GITCODE_TOKEN:
             secrets_map["GITCODE_TOKEN"] = GITCODE_TOKEN
-        # 负责人通知配置（triage 时通知负责人）
-        if owner_str:
-            secrets_map["OWNER_USERS"] = ",".join(u.strip() for u in re.split(r'[,\n]+', owner_str) if u.strip())
-        if maintainer_str:
-            secrets_map["MAINTAINER_USERS"] = ",".join(u.strip() for u in re.split(r'[,\n]+', maintainer_str) if u.strip())
-        if owner_email_str:
-            secrets_map["OWNER_EMAILS"] = ",".join(u.strip() for u in re.split(r'[,\n]+', owner_email_str) if u.strip())
-        if maintainer_email_str:
-            secrets_map["MAINTAINER_EMAILS"] = ",".join(u.strip() for u in re.split(r'[,\n]+', maintainer_email_str) if u.strip())
-        if feishu_open_id_str:
-            secrets_map["FEISHU_OPEN_IDS"] = ",".join(u.strip() for u in re.split(r'[,\n]+', feishu_open_id_str) if u.strip())
 
         for name, value in secrets_map.items():
             # 获取仓库 public key
@@ -1906,12 +1878,6 @@ def main():
         ("### Writer", "Writer"),
         ("### 申请理由", "申请理由"),
         ("### Justification", "申请理由"),
-        ("### Owner 邮箱", "Owner 邮箱"),
-        ("### Owner Email", "Owner 邮箱"),
-        ("### Maintainer 邮箱", "Maintainer 邮箱"),
-        ("### Maintainer Email", "Maintainer 邮箱"),
-        ("### 飞书 open_id", "飞书 open_id"),
-        ("### Feishu open_id", "飞书 open_id"),
     ]
 
     for i, line in enumerate(lines):
@@ -1970,12 +1936,6 @@ def main():
     writer_str = fields.get("Writer", "")
 
     justification = fields.get("申请理由", "")
-
-    owner_email_str = fields.get("Owner 邮箱", "")
-
-    maintainer_email_str = fields.get("Maintainer 邮箱", "")
-
-    feishu_open_id_str = fields.get("飞书 open_id", "")
 
 
 
@@ -2188,9 +2148,8 @@ def main():
 
     enable_security(repo_name, level)
 
-    # 配置仓库级 secrets（BOT_TOKEN + 负责人通知配置），确保 triage 等 workflow 可访问
-    setup_repo_secrets(repo_name, owner_email_str, maintainer_email_str, feishu_open_id_str,
-                       owner_str, maintainer_str)
+    # 配置仓库级 secrets（BOT_TOKEN），确保 triage 等 workflow 可访问 .github action
+    setup_repo_secrets(repo_name)
 
 
 
