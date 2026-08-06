@@ -1,5 +1,7 @@
 # 安全策略
 
+> **语言切换：** [English](./SECURITY.en.md) | 中文
+
 ## 报告安全漏洞
 
 **请勿通过GitHub Issue公开报告安全漏洞。**

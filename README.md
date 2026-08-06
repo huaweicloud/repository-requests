@@ -1,5 +1,7 @@
 # 🤖 Repository Requests
 
+> **语言切换：** [English](./README.en.md) | 中文
+
 社区贡献者在此仓库提交 Issue 来申请在 `huaweicloud` 组织下创建新仓库。
 
 ## 工作流程
