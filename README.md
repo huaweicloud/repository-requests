@@ -9,18 +9,18 @@
         ↓
 机器人自动处理
         ↓
-├── 验证仓库名称
-├── 检查是否重名
-├── 创建仓库
+├── 表单校验（仓库名称 / 类型匹配 / Topics≥3 / 角色人数）
+├── 审批通过 → 创建仓库
 ├── 初始化社区治理配置
-│   ├── CONTRIBUTING.md
-│   ├── SECURITY.md
-│   ├── .github/dependabot.yml
-│   ├── .github/stale.yml
-│   ├── .github/ISSUE_TEMPLATE/
-│   ├── .github/workflows/triage-issue.yml
+│   ├── README.md / LICENSE / CONTRIBUTING.md / SECURITY.md
+│   ├── .github/CODEOWNERS
+│   ├── .github/workflows/ci.yml / triage-issue.yml
+│   ├── .github/workflows/status-transition.yml / sync-to-gitcode.yml
+│   ├── .github/ISSUE_TEMPLATE/ + PULL_REQUEST_TEMPLATE.md
 │   └── 标签体系
-├── 启用安全功能
+├── 配置仓库级 Secrets（BOT_TOKEN / GITCODE_TOKEN）
+├── 开启分支保护（仅 public 仓库）
+├── GitCode 同步建仓（元数据一致）
 └── 关闭 Issue
 ```
 
@@ -35,21 +35,27 @@
 
 | 字段 | 必填 | 说明 |
 |------|------|------|
-| 仓库名称 | ✅ | 小写字母、数字、连字符 |
+| 初始化语言 | ✅ | 中文 / English，决定仓库初始化模板语言 |
+| 仓库类型 | ✅ | 组合选项（一级分类 / 具体项目）：产品项目/SDK、示例教程/示例/Lab/Sample 等 9 项 |
+| 仓库名称 | ✅ | 小写字母、数字、连字符，≤100字符 |
 | 仓库描述 | ✅ | 简要描述用途 |
 | 可见性 | ✅ | public / private |
-| 主要编程语言 | ✅ | Python/TypeScript/Go/Java/Rust/C++/Shell/Other |
-| 开源许可证 | ✅ | Apache-2.0/MIT/GPL-3.0/BSD-3-Clause/无 |
-| Topics | ❌ | 逗号分隔的标签 |
+| 开源许可证 | ✅ | Apache-2.0(推荐)/MIT/BSD-3-Clause（仅产品项目使用用户选择，其余强制 Apache-2.0） |
+| Topics 标签 | ✅ | 逗号或换行分隔，**至少 3 个**，每个匹配 `[a-z0-9][a-z0-9.-]*` |
+| Owner（管理员） | ✅ | GitHub 用户名，严格控制在 1-2 人 |
+| Maintainer（维护者） | ✅ | GitHub 用户名，控制在 2-3 人 |
+| Writer（写入者） | | 可选 |
 | 申请理由 | ✅ | 为什么需要这个仓库 |
 
 ## 状态标签
 
 | 标签 | 含义 |
 |------|------|
-| `status/pending` | 等待处理 |
+| `status/pending` | 已通过校验，等待审批 |
+| `status/approved` | 已批准，触发建仓 |
+| `status/declined` | 已拒绝 |
+| `status/completed` | 建仓完成 |
 | `status/in-progress` | 正在处理 |
-| `status/completed` | 已完成 |
 | `status/failed` | 处理失败 |
 
 ## 权限说明
