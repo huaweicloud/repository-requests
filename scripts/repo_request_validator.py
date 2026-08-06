@@ -100,6 +100,12 @@ def parse_fields(body):
         ("### Writer", "Writer"),
         ("### 申请理由", "申请理由"),
         ("### Justification", "申请理由"),
+        ("### Owner 邮箱", "Owner 邮箱"),
+        ("### Owner Email", "Owner 邮箱"),
+        ("### Maintainer 邮箱", "Maintainer 邮箱"),
+        ("### Maintainer Email", "Maintainer 邮箱"),
+        ("### 飞书 open_id", "飞书 open_id"),
+        ("### Feishu open_id", "飞书 open_id"),
     ]
     for i, line in enumerate(lines):
         for prefix, key in prefix_map:
@@ -196,6 +202,9 @@ def main():
     topics_raw = fields.get("Topics 标签", "")
     owner_str = fields.get("Owner", "")
     maint_str = fields.get("Maintainer", "")
+    owner_email_str = fields.get("Owner 邮箱", "")
+    maintainer_email_str = fields.get("Maintainer 邮箱", "")
+    feishu_open_id_str = fields.get("飞书 open_id", "")
 
     # 组合选项拆分: "一级分类 / 二级类型"（容忍空格差异）
     repo_category, repo_type = parse_repo_type_combo(repo_type_combo)
@@ -227,6 +236,23 @@ def main():
         errors.append("- Maintainer（维护者）控制在 2-3 人（当前不足 2 人）")
     elif len(maintainers) > 3:
         errors.append(f"- Maintainer（维护者）控制在 2-3 人（当前 {len(maintainers)} 人）")
+
+    # 通知配置校验
+    import re as _re
+    email_re = _re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    owner_emails = split_users(owner_email_str)
+    if not owner_emails:
+        errors.append("- Owner 邮箱至少填写 1 个（用于接收 Issue 通知）")
+    elif not all(email_re.match(e) for e in owner_emails):
+        errors.append(f"- Owner 邮箱格式不正确: {owner_email_str}")
+    if maintainer_email_str:
+        maint_emails = split_users(maintainer_email_str)
+        if not all(email_re.match(e) for e in maint_emails):
+            errors.append(f"- Maintainer 邮箱格式不正确: {maintainer_email_str}")
+    if feishu_open_id_str:
+        open_ids = split_users(feishu_open_id_str)
+        if not all(oid.startswith("ou_") for oid in open_ids):
+            errors.append("- 飞书 open_id 格式不正确（应以 ou_ 开头）")
 
     comment_path = f"/repos/{repo_full}/issues/{number}/comments"
 
