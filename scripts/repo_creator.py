@@ -2359,8 +2359,7 @@ def main():
     create_file(repo_name, "README.md", readme, "Init README")
 
     create_file(repo_name, "LICENSE", get_license_text(license_name), f"Add {license_name} license")
-    # PR standards (all levels): CI + CODEOWNERS
-    create_file(repo_name, ".github/workflows/ci.yml", CI_WORKFLOW, "Add CI workflow")
+    # L1 基线: CODEOWNERS（所有等级）
     create_file(repo_name, ".github/CODEOWNERS", CODEOWNERS_MD, "Add CODEOWNERS")
 
     contributing_md = CONTRIBUTING_MD_EN if init_lang == "en" else CONTRIBUTING_MD
@@ -2374,6 +2373,8 @@ def main():
 
 
     if level in ("product", "sample"):
+        # L1 增强: CI + CONTRIBUTING（产品/示例需要 CI 验证）
+        create_file(repo_name, ".github/workflows/ci.yml", CI_WORKFLOW, "Add CI workflow")
 
         create_file(repo_name, "CONTRIBUTING.md", contributing_md.format(name=repo_name), "Add contributing guide")
 
