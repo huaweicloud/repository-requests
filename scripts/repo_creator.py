@@ -4,7 +4,7 @@
 
 huaweicloud 建仓机器人 — 按 GOAT 建仓流程文档 v1.1
 
-支持 9 种仓库类型 → 4 个等级初始化（2~14 项）
+支持 9 种仓库类型 → 4 个等级初始化（2~17 项）
 
 """
 
@@ -2467,7 +2467,7 @@ def main():
 
     # close issue
 
-    init_count = {"product": 14, "sample": 7, "docs": 3, "internal": 2}[level]
+    init_count = {"product": 17, "sample": 11, "docs": 5, "internal": 4}[level]
 
     lines = [
 
