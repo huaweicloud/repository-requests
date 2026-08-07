@@ -1779,15 +1779,32 @@ updates:
 
 
 
-LABELS_PRODUCT = ["type/bug", "type/enhancement", "type/question", "type/documentation",
+# 类型标签（统一使用 type/feature，不用 type/enhancement）
+LABELS_TYPE = ["type/bug", "type/feature", "type/question", "type/documentation"]
 
-                  "priority/critical", "priority/high", "priority/medium", "priority/low",
+# 优先级标签
+LABELS_PRIORITY = ["priority/critical", "priority/high", "priority/medium", "priority/low"]
 
-                  "status/pending", "status/in-progress", "status/blocked",
+# 状态标签
+LABELS_STATUS = ["status/pending", "status/triaged", "status/in-progress", "status/resolved",
+                 "status/completed", "status/stale", "status/blocked"]
 
-                  "good first issue", "help wanted", "agent/triaged"]
+# 领域标签
+LABELS_AREA = ["area/api", "area/web", "area/ci-cd", "area/sdk", "area/security",
+               "area/performance", "area/database"]
 
-LABELS_SAMPLE = LABELS_PRODUCT[:8]
+# SLA / 自动化标签
+LABELS_SLA = ["sla/breach", "sla/warning", "escalation"]
+
+# 机器人 / 社区标签
+LABELS_COMMUNITY = ["agent/triaged", "good first issue", "help wanted"]
+
+# 产品级完整标签（28 个）
+LABELS_PRODUCT = (LABELS_TYPE + LABELS_PRIORITY + LABELS_STATUS + LABELS_AREA
+                  + LABELS_SLA + LABELS_COMMUNITY)
+
+# 示例级标签（type + priority，8 个）
+LABELS_SAMPLE = LABELS_TYPE + LABELS_PRIORITY
 
 
 
