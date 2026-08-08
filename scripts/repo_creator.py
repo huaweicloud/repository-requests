@@ -1805,14 +1805,29 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            const labels = (context.payload.issue.labels || []).map(l => l.name);
-            const newLabels = labels
-              .filter(l => !l.startsWith('status/'))
-              .concat('status/completed');
-            await github.rest.issues.update({
-              owner: context.repo.owner, repo: context.repo.repo,
-              issue_number: context.issue.number, labels: [...new Set(newLabels)]
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issueNumber = context.issue.number;
+            const { data: search } = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} type:pr is:merged "${issueNumber}"`
             });
+            const closedByMergedPR = search.total_count > 0;
+            const labels = (context.payload.issue.labels || []).map(l => l.name);
+            if (closedByMergedPR) {
+              const newLabels = labels
+                .filter(l => !l.startsWith('status/'))
+                .concat('status/resolved');
+              await github.rest.issues.update({
+                owner, repo, issue_number: issueNumber, labels: [...new Set(newLabels)]
+              });
+            } else {
+              const newLabels = labels
+                .filter(l => !l.startsWith('status/'))
+                .concat('status/completed');
+              await github.rest.issues.update({
+                owner, repo, issue_number: issueNumber, labels: [...new Set(newLabels)]
+              });
+            }
 """
 
 DEPENDABOT = """version: 2
