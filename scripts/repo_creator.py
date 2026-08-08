@@ -1824,22 +1824,17 @@ jobs:
                 if (search.total_count > 0) { closedByMergedPR = true; break; }
               }
             }
-            const labels = (context.payload.issue.labels || []).map(l => l.name);
-            if (closedByMergedPR) {
-              const newLabels = labels
-                .filter(l => !l.startsWith('status/'))
-                .concat('status/resolved');
-              await github.rest.issues.update({
-                owner, repo, issue_number: issueNumber, labels: [...new Set(newLabels)]
-              });
-            } else {
-              const newLabels = labels
-                .filter(l => !l.startsWith('status/'))
-                .concat('status/completed');
-              await github.rest.issues.update({
-                owner, repo, issue_number: issueNumber, labels: [...new Set(newLabels)]
-              });
-            }
+            const currentIssue = await github.rest.issues.get({
+              owner, repo, issue_number: issueNumber
+            });
+            const labels = (currentIssue.data.labels || []).map(l => l.name);
+            const nextStatus = closedByMergedPR ? 'status/resolved' : 'status/completed';
+            const newLabels = labels
+              .filter(l => !l.startsWith('status/'))
+              .concat(nextStatus);
+            await github.rest.issues.update({
+              owner, repo, issue_number: issueNumber, labels: [...new Set(newLabels)]
+            });
 """
 
 DEPENDABOT = """version: 2
