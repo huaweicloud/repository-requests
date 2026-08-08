@@ -2001,41 +2001,6 @@ def assign_role(repo, role, users):
 
 
 
-def setup_branch_protection(repo, private):
-    """为仓库配置 main 分支保护。
-
-    仅 public 仓库启用（private 仓库受 GitHub Free 计划限制无法配置分支保护）。
-    配置：2 人 Approve、Code Owner Review、过期 Review 作废、严格 CI 检查。
-    """
-    if private:
-        print(f"[{repo}] Private repo, skip branch protection (Free plan limitation)")
-        return
-
-    branch = "main"
-    # 确认分支存在（新仓库默认 main）
-    br = api("GET", f"/repos/{ORG}/{repo}/branches/{branch}", "bot")
-    if not br or "name" not in br:
-        print(f"[{repo}] Branch {branch} not found, skip protection")
-        return
-
-    payload = {
-        "required_status_checks": {
-            "strict": True,
-            "contexts": ["lint", "test", "build"],
-        },
-        "enforce_admins": True,
-        "required_pull_request_reviews": {
-            "required_approving_review_count": 2,
-            "dismiss_stale_reviews": True,
-            "require_code_owner_reviews": True,
-        },
-        "restrictions": None,
-    }
-    result = api("PUT", f"/repos/{ORG}/{repo}/branches/{branch}/protection", "bot", payload)
-    print(f"[{repo}] Branch protection configured (2 approve + codeowner + strict CI)")
-
-
-
 def notify_feishu(repo_name, repo_type, url, author, gitcode_url=None):
 
     if not all([FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_ADMIN_OPEN_ID]):
@@ -2498,8 +2463,7 @@ def main():
 
 
 
-    # configure branch protection (public repos only)
-    setup_branch_protection(repo_name, private=(visibility == "private"))
+    # 分支保护不在建仓时配置（L1 准入不要求）；由 governance_upgrade.py 在 L2（Stars ≥ 20）时自动启用
 
     # create GitCode mirror (metadata consistent with GitHub)
     gitcode_url = create_gitcode_repo(repo_name, description, private=(visibility == "private"))
