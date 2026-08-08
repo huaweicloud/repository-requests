@@ -1808,10 +1808,22 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const issueNumber = context.issue.number;
-            const { data: search } = await github.rest.search.issuesAndPullRequests({
-              q: `repo:${owner}/${repo} type:pr is:merged "${issueNumber}"`
-            });
-            const closedByMergedPR = search.total_count > 0;
+            let closedByMergedPR = false;
+            for (const phrase of [`Fixes #${issueNumber}`, `Closes #${issueNumber}`, `Resolves #${issueNumber}`, `fixes #${issueNumber}`, `closes #${issueNumber}`, `resolves #${issueNumber}`]) {
+              const { data: search } = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${owner}/${repo} type:pr "${phrase}"`
+              });
+              if (search.total_count > 0) { closedByMergedPR = true; break; }
+            }
+            if (!closedByMergedPR) {
+              await new Promise(r => setTimeout(r, 15000));
+              for (const phrase of [`Fixes #${issueNumber}`, `Closes #${issueNumber}`, `Resolves #${issueNumber}`, `fixes #${issueNumber}`, `closes #${issueNumber}`, `resolves #${issueNumber}`]) {
+                const { data: search } = await github.rest.search.issuesAndPullRequests({
+                  q: `repo:${owner}/${repo} type:pr "${phrase}"`
+                });
+                if (search.total_count > 0) { closedByMergedPR = true; break; }
+              }
+            }
             const labels = (context.payload.issue.labels || []).map(l => l.name);
             if (closedByMergedPR) {
               const newLabels = labels
