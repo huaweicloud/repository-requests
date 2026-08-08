@@ -1596,6 +1596,10 @@ on:
 
     types: [opened]
 
+  issue_comment:
+
+    types: [created]
+
 permissions:
 
   issues: write
@@ -1645,6 +1649,40 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
 
         run: python3 .github-repo/actions/issue-bot/issue_bot.py
+
+      - name: Mark as triaged
+
+        uses: actions/github-script@v7
+
+        with:
+
+          script: |
+
+            const labels = context.payload.issue.labels.map(l => l.name);
+
+            if (labels.includes('status/triaged') || labels.includes('type/bug') || labels.includes('type/feature')) {
+
+              const currentLabels = context.payload.issue.labels.map(l => l.name);
+
+              const newLabels = currentLabels
+
+                .filter(l => l !== 'status/pending')
+
+                .concat('status/triaged');
+
+              await github.rest.issues.update({
+
+                owner: context.repo.owner,
+
+                repo: context.repo.repo,
+
+                issue_number: context.issue.number,
+
+                labels: [...new Set(newLabels)]
+
+              });
+
+            }
 
 """
 
