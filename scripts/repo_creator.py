@@ -1749,7 +1749,7 @@ permissions:
   contents: read
 jobs:
   link-pr-to-issue:
-    if: github.event.pull_request
+    if: github.event.pull_request && (github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v7
