@@ -1652,6 +1652,8 @@ jobs:
 
       - name: Mark as triaged
 
+        if: github.event_name == 'issues'
+
         uses: actions/github-script@v7
 
         with:
