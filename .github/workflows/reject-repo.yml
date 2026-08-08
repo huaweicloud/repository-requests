@@ -28,5 +28,7 @@ jobs:
           gh issue comment "$ISSUE_NUMBER" -R "${{ github.repository }}" \
             --body "您的建仓申请已被拒绝，原因如下：$REASON"
           gh issue edit "$ISSUE_NUMBER" -R "${{ github.repository }}" \
+            --remove-label "status/pending" || true
+          gh issue edit "$ISSUE_NUMBER" -R "${{ github.repository }}" \
             --add-label "status/declined"
           echo "Rejected issue #$ISSUE_NUMBER"

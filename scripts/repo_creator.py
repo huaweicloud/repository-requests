@@ -2506,6 +2506,10 @@ def main():
 
     api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/comments", "gh", {"body": comment})
 
+    # 移除旧状态标签，只保留 status/completed
+    for old_label in ["status/pending", "status/approved", "status/in-progress"]:
+        api("DELETE", f"/repos/{ORG}/repository-requests/issues/{issue_number}/labels/{old_label}", "gh")
+
     api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/labels", "gh", {"labels": ["status/completed"]})
 
     api("PATCH", f"/repos/{ORG}/repository-requests/issues/{issue_number}", "gh", {"state": "closed"})

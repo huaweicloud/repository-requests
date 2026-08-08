@@ -18,5 +18,8 @@ jobs:
         run: |
           gh issue edit ${{ inputs.issue_number }} \
             -R ${{ github.repository }} \
+            --remove-label "status/pending" || true
+          gh issue edit ${{ inputs.issue_number }} \
+            -R ${{ github.repository }} \
             --add-label "status/approved"
           echo "Approved issue #${{ inputs.issue_number }}"
