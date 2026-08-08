@@ -1636,6 +1636,10 @@ jobs:
 
           python-version: '3.12'
 
+      - name: Install dependencies
+
+        run: pip install pyyaml
+
       - name: Run Issue Bot
 
         env:
@@ -1660,11 +1664,19 @@ jobs:
 
           script: |
 
-            const labels = context.payload.issue.labels.map(l => l.name);
+            const { data: issue } = await github.rest.issues.get({
 
-            if (labels.includes('status/triaged') || labels.includes('type/bug') || labels.includes('type/feature')) {
+              owner: context.repo.owner,
 
-              const currentLabels = context.payload.issue.labels.map(l => l.name);
+              repo: context.repo.repo,
+
+              issue_number: context.issue.number
+
+            });
+
+            const currentLabels = issue.labels.map(l => l.name);
+
+            if (currentLabels.includes('status/triaged') || currentLabels.includes('type/bug') || currentLabels.includes('type/feature')) {
 
               const newLabels = currentLabels
 
