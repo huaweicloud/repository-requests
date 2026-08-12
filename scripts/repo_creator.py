@@ -146,6 +146,18 @@ def api(method, path, token=None, data=None):
 
         return None
 
+    except urllib.error.URLError as e:
+
+        print(f"API {method} {path}: network error {e.reason}")
+
+        return None
+
+    except Exception as e:
+
+        print(f"API {method} {path}: unexpected error {e}")
+
+        return None
+
 
 
 
@@ -1912,7 +1924,17 @@ def b64(s):
 
 def create_labels(repo, labels):
 
+    existing = api("GET", f"/repos/{ORG}/{repo}/labels?per_page=100", "bot")
+
+    have = {l["name"] for l in existing} if isinstance(existing, list) else set()
+
     for name in labels:
+
+        if name in have:
+
+            print(f"[{repo}] label {name} already exists, skip")
+
+            continue
 
         api("POST", f"/repos/{ORG}/{repo}/labels", "bot", {"name": name, "color": "ededed"})
 
