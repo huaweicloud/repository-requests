@@ -132,6 +132,21 @@ def split_users(raw):
     return [u.strip() for u in re.split(r'[,\n]+', raw) if u.strip()]
 
 
+def get_org_members(org="huaweicloud"):
+    """拉取组织全部成员登录名集合（分页）"""
+    members = set()
+    page = 1
+    while page <= 10:
+        result = api("GET", f"/orgs/{org}/members?per_page=100&page={page}")
+        if not isinstance(result, list) or not result:
+            break
+        members.update(u.get("login") for u in result if isinstance(u, dict) and u.get("login"))
+        if len(result) < 100:
+            break
+        page += 1
+    return members
+
+
 CATEGORY_TYPES = {
     "产品项目": ["SDK", "Terraform Provider", "GitHub Action", "框架集成", "Exporter / Plugin", "IoT SDK"],
     "示例教程": ["示例 / Lab / Sample"],
@@ -219,6 +234,8 @@ def main():
 
     owners = split_users(owner_str)
     maintainers = split_users(maint_str)
+    writer_str = fields.get("Writer", "")
+    writers = split_users(writer_str)
     if not owners:
         errors.append("- Owner（管理员）至少 1 人")
     elif len(owners) > 2:
@@ -227,6 +244,21 @@ def main():
         errors.append("- Maintainer（维护者）控制在 2-3 人（当前不足 2 人）")
     elif len(maintainers) > 3:
         errors.append(f"- Maintainer（维护者）控制在 2-3 人（当前 {len(maintainers)} 人）")
+
+    # 组织成员校验：Owner/Maintainer/Writer 均须为组织成员
+    # （private 仓库 collaborator 必须是组织成员，提前校验避免审批后建仓失败）
+    org_members = get_org_members()
+    role_users = []
+    for u in owners:
+        role_users.append((u, "Owner"))
+    for u in maintainers:
+        role_users.append((u, "Maintainer"))
+    for u in writers:
+        role_users.append((u, "Writer"))
+    non_members = [(u, role) for u, role in role_users if u and u not in org_members]
+    if non_members:
+        detail = "、".join(f"`{u}`({role})" for u, role in non_members)
+        errors.append(f"- 以下角色用户不是组织成员（private 仓库 collaborator 须为组织成员，请先加入组织后再申请）：{detail}")
 
     comment_path = f"/repos/{repo_full}/issues/{number}/comments"
 
