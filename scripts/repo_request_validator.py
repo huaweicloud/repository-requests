@@ -211,6 +211,7 @@ def main():
     topics_raw = fields.get("Topics 标签", "")
     owner_str = fields.get("Owner", "")
     maint_str = fields.get("Maintainer", "")
+    visibility = (fields.get("可见性", "") or "").strip().lower()
 
     # 组合选项拆分: "一级分类 / 二级类型"（容忍空格差异）
     repo_category, repo_type = parse_repo_type_combo(repo_type_combo)
@@ -245,9 +246,8 @@ def main():
     elif len(maintainers) > 3:
         errors.append(f"- Maintainer（维护者）控制在 2-3 人（当前 {len(maintainers)} 人）")
 
-    # 组织成员校验：Owner/Maintainer/Writer 均须为组织成员
-    # （private 仓库 collaborator 必须是组织成员，提前校验避免审批后建仓失败）
-    org_members = get_org_members()
+    # 组织成员校验：仅 private 仓库强制（private collaborator 必须是组织成员）
+    # public 仓库允许 outside collaborator（邀请制），不阻断，仅提示
     role_users = []
     for u in owners:
         role_users.append((u, "Owner"))
@@ -255,10 +255,12 @@ def main():
         role_users.append((u, "Maintainer"))
     for u in writers:
         role_users.append((u, "Writer"))
-    non_members = [(u, role) for u, role in role_users if u and u not in org_members]
-    if non_members:
-        detail = "、".join(f"`{u}`({role})" for u, role in non_members)
-        errors.append(f"- 以下角色用户不是组织成员（private 仓库 collaborator 须为组织成员，请先加入组织后再申请）：{detail}")
+    if visibility == "private":
+        org_members = get_org_members()
+        non_members = [(u, role) for u, role in role_users if u and u not in org_members]
+        if non_members:
+            detail = "、".join(f"`{u}`({role})" for u, role in non_members)
+            errors.append(f"- 以下角色用户不是组织成员（private 仓库 collaborator 须为组织成员，请先加入组织后再申请）：{detail}")
 
     comment_path = f"/repos/{repo_full}/issues/{number}/comments"
 
