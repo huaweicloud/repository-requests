@@ -2042,7 +2042,8 @@ def validate_repo_name(name):
 
 def validate_topics(topics_str):
 
-    topics = re.split(r'[,\n]+', topics_str.strip())
+    # 兼容多种分隔符：英文逗号、中文逗号、顿号、分号、换行、空白
+    topics = re.split(r'[,\n、；;　\s]+', topics_str.strip())
 
     valid = []
 
@@ -2344,8 +2345,8 @@ def main():
         sys.exit(1)
 
     # 角色人数校验：Owner 1-2 人，Maintainer 2-3 人
-    owners = [u.strip() for u in re.split(r'[,\n]+', owner_str) if u.strip()]
-    maintainers = [u.strip() for u in re.split(r'[,\n]+', maintainer_str) if u.strip()]
+    owners = [u.strip() for u in re.split(r'[,\n、；;　\s]+', owner_str) if u.strip()]
+    maintainers = [u.strip() for u in re.split(r'[,\n、；;　\s]+', maintainer_str) if u.strip()]
     if not owners:
         api("POST", f"/repos/{ORG}/repository-requests/issues/{issue_number}/comments", "gh",
             {"body": "  **Owner 缺失**：Owner（管理员）至少 1 人"})
@@ -2530,7 +2531,7 @@ def main():
 
     # roles
 
-    writers = [u.strip() for u in re.split(r'[,\n]+', writer_str) if u.strip()]
+    writers = [u.strip() for u in re.split(r'[,\n、；;　\s]+', writer_str) if u.strip()]
 
 
 

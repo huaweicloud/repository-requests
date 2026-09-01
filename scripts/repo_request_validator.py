@@ -124,12 +124,12 @@ def validate_repo_name(name):
 
 
 def validate_topics(raw):
-    topics = re.split(r'[,\n]+', raw.strip())
+    topics = re.split(r'[,\n、；;　\s]+', raw.strip())
     return [t.strip().lower() for t in topics if re.match(r'^[a-z0-9][a-z0-9.-]*$', t.strip())]
 
 
 def split_users(raw):
-    return [u.strip() for u in re.split(r'[,\n]+', raw) if u.strip()]
+    return [u.strip() for u in re.split(r'[,\n、；;　\s]+', raw) if u.strip()]
 
 
 def get_org_members(org="huaweicloud"):
