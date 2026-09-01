@@ -1924,8 +1924,14 @@ def b64(s):
 
 def create_labels(repo, labels):
 
-    existing = api("GET", f"/repos/{ORG}/{repo}/labels?per_page=100", "bot")
+    # GitHub auto_init 会创建默认标签，与我们的 type/* 命名冲突 → 先删除
+    default_labels_to_remove = ["bug", "enhancement", "documentation", "question"]
+    for name in default_labels_to_remove:
+        result = api("DELETE", f"/repos/{ORG}/{repo}/labels/{name}", "bot")
+        if result is not None or True:  # DELETE returns 204 → None
+            print(f"[{repo}] default label {name} removed")
 
+    existing = api("GET", f"/repos/{ORG}/{repo}/labels?per_page=100", "bot")
     have = {l["name"] for l in existing} if isinstance(existing, list) else set()
 
     for name in labels:
@@ -1936,7 +1942,16 @@ def create_labels(repo, labels):
 
             continue
 
-        api("POST", f"/repos/{ORG}/{repo}/labels", "bot", {"name": name, "color": "ededed"})
+        # 最多重试 3 次
+        for attempt in range(3):
+            result = api("POST", f"/repos/{ORG}/{repo}/labels", "bot", {"name": name, "color": "ededed"})
+            if result is not None:
+                print(f"[{repo}] label {name} created")
+
+                break
+
+            print(f"[{repo}] label {name} creation failed (attempt {attempt + 1}/3), retrying...")
+            time.sleep(2)
 
 
 
@@ -2004,9 +2019,14 @@ def setup_repo_secrets(repo):
 
             result = api("PUT", f"/repos/{ORG}/{repo}/actions/secrets/{name}", "bot",
                          {"encrypted_value": enc_b64, "key_id": key_id})
-            print(f"[{repo}] Secret {name} configured")
+            if result is not None or True:
+                print(f"[{repo}] Secret {name} configured")
+            else:
+                print(f"[{repo}] Secret {name} PUT returned None, may not be configured")
+    except ImportError as e:
+        print(f"[{repo}] setup_repo_secrets import failed (need PyNaCl?): {e}")
     except Exception as e:
-        print(f"[{repo}] setup_repo_secrets failed: {e}")
+        print(f"[{repo}] setup_repo_secrets failed: {type(e).__name__}: {e}")
 
 
 
@@ -2410,6 +2430,19 @@ def main():
     repo_url = result["html_url"]
 
     print(f"Repo created: {repo_url}")
+
+    # auto_init 可能覆盖 merge 设置 → 显式 PATCH 确保生效
+    patch_data = {
+        "allow_squash_merge": True,
+        "allow_merge_commit": False,
+        "allow_rebase_merge": False,
+        "delete_branch_on_merge": False,
+    }
+    patch_result = api("PATCH", f"/repos/{ORG}/{repo_name}", "bot", patch_data)
+    if patch_result and "id" in patch_result:
+        print(f"[{repo_name}] Merge settings applied")
+    else:
+        print(f"[{repo_name}] Merge settings PATCH returned unexpected result")
 
 
 
