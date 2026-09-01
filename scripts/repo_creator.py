@@ -549,7 +549,7 @@ README_TEMPLATES = {
 
     "SDK": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -587,7 +587,7 @@ pip install {name}
 
     "Terraform Provider": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -623,7 +623,7 @@ provider "{name}" {{
 
     "GitHub Action": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -669,7 +669,7 @@ provider "{name}" {{
 
     "框架集成": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -709,7 +709,7 @@ pip install {name}
 
     "Exporter / Plugin": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -741,7 +741,7 @@ docker run -d --name {name} huaweicloud/{name}:latest
 
     "IoT SDK": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -860,7 +860,7 @@ README_TEMPLATES_EN = {
 
     "SDK": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -898,7 +898,7 @@ This project is licensed under the {license} license.
 
     "Terraform Provider": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -934,7 +934,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 
     "GitHub Action": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -980,7 +980,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 
     "框架集成": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -1020,7 +1020,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 
     "Exporter / Plugin": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
@@ -1052,7 +1052,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 
     "IoT SDK": """# {name}
 
-[![License](https://img.shields.io/badge/License-{license}-blue.svg)](LICENSE)
+[![License](https://badgen.net/static/License/{license}/blue)](LICENSE)
 
 
 
