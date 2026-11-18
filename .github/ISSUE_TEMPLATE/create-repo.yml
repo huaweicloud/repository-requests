@@ -136,7 +136,7 @@ body:
           required: true
         - label: 我已确认组织内不存在同名仓库
           required: true
-        - label: 以上填写的 Owner 和 Maintainer 均为组织成员
+        - label: 以上填写的 Owner 和 Maintainer 账号有效（非组织成员将以外部协作者身份被邀请，需本人接受）
           required: true
         - label: Owner（管理员）人数控制在 1-2 人，Maintainer（维护者）人数控制在 2-3 人
           required: true

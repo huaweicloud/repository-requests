@@ -17,7 +17,8 @@ jobs:
 
       - name: Validate Repo Request
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 必须用带 read:org 的 PAT：GITHUB_TOKEN 只能看到“公开成员”，会把 private 成员误判为非成员
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}
           FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
           FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}

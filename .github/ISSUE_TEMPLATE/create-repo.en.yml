@@ -136,7 +136,7 @@ body:
           required: true
         - label: I confirm no repository with the same name exists in the organization
           required: true
-        - label: The Owner and Maintainer listed above are all organization members
+        - label: The Owner and Maintainer accounts above are valid (non-members will be invited as outside collaborators and must accept)
           required: true
         - label: Owner count is limited to 1-2 people, Maintainer count to 2-3 people
           required: true

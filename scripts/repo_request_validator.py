@@ -133,7 +133,11 @@ def split_users(raw):
 
 
 def get_org_members(org="huaweicloud"):
-    """拉取组织全部成员登录名集合（分页）"""
+    """拉取组织全部成员登录名集合（分页）
+
+    注意：token 没有 read:org 时，GitHub 只返回“公开成员”，会把 private 成员误判为非成员。
+    因此调用方必须处理空集合，退回 check_org_member() 逐用户判定。
+    """
     members = set()
     page = 1
     while page <= 10:
@@ -145,6 +149,27 @@ def get_org_members(org="huaweicloud"):
             break
         page += 1
     return members
+
+
+def check_org_member(org, login):
+    """已废弃：成员校验不再阻断，保留该函数仅为兼容旧调用方。
+
+    单用户成员判定：True=成员, False=非成员, None=无法判定（token 权限不足/接口异常）
+    """
+    url = f"{GITHUB_API}/orgs/{org}/members/{login}"
+    req = urllib.request.Request(url, headers=HEADERS, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=20):
+            return True
+    except urllib.error.HTTPError as e:
+        e.read()
+        if e.code == 404:
+            return False
+        print(f"API GET /orgs/{org}/members/{login}: {e.code}")
+        return None
+    except Exception as e:
+        print(f"API GET /orgs/{org}/members/{login}: {e}")
+        return None
 
 
 CATEGORY_TYPES = {
@@ -255,12 +280,19 @@ def main():
         role_users.append((u, "Maintainer"))
     for u in writers:
         role_users.append((u, "Writer"))
+    # 组织成员校验：不再阻断。组织实际允许外部协作者（私有仓已有大量 admin 外部协作者），
+    # 真正的门槛是建仓前的人工审批（status/approved）；这里只把非成员列给审批人看。
+    outside_hint = ""
     if visibility == "private":
         org_members = get_org_members()
-        non_members = [(u, role) for u, role in role_users if u and u not in org_members]
-        if non_members:
-            detail = "、".join(f"`{u}`({role})" for u, role in non_members)
-            errors.append(f"- 以下角色用户不是组织成员（private 仓库 collaborator 须为组织成员，请先加入组织后再申请）：{detail}")
+        if not org_members or len(org_members) < 10:
+            print(f"WARN: 成员列表仅 {len(org_members)} 人，疑似 token 缺 read:org，跳过成员提示")
+        else:
+            outsiders = [(u, role) for u, role in role_users if u and u not in org_members]
+            if outsiders:
+                detail = "、".join(f"`{u}`({role})" for u, role in outsiders)
+                outside_hint = ("\n\n> 提示：以下角色用户不在 huaweicloud 组织内，建仓后将以**外部协作者**"
+                                f"（outside collaborator）身份被邀请，需本人接受邀请：{detail}")
 
     comment_path = f"/repos/{repo_full}/issues/{number}/comments"
 
@@ -275,7 +307,7 @@ def main():
         current_labels = [l["name"] for l in issue.get("labels", [])]
         if "status/pending" not in current_labels:
             api("POST", f"/repos/{repo_full}/issues/{number}/labels", {"labels": ["status/pending"]})
-            msg = "##  建仓申请校验通过\n\n所有字段符合规范，等待管理员审批。"
+            msg = "##  建仓申请校验通过\n\n所有字段符合规范，等待管理员审批。" + outside_hint
             api("POST", comment_path, {"body": msg})
             author = issue.get("user", {}).get("login", "")
             description = fields.get("仓库描述", "")
