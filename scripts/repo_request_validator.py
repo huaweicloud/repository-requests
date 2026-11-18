@@ -133,7 +133,11 @@ def split_users(raw):
 
 
 def get_org_members(org="huaweicloud"):
-    """拉取组织全部成员登录名集合（分页）"""
+    """拉取组织全部成员登录名集合（分页）
+
+    注意：token 没有 read:org 时，GitHub 只返回“公开成员”，会把 private 成员误判为非成员。
+    因此调用方必须处理空集合，退回 check_org_member() 逐用户判定。
+    """
     members = set()
     page = 1
     while page <= 10:
@@ -145,6 +149,24 @@ def get_org_members(org="huaweicloud"):
             break
         page += 1
     return members
+
+
+def check_org_member(org, login):
+    """单用户成员判定：True=成员, False=非成员, None=无法判定（token 权限不足/接口异常）"""
+    url = f"{GITHUB_API}/orgs/{org}/members/{login}"
+    req = urllib.request.Request(url, headers=HEADERS, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=20):
+            return True
+    except urllib.error.HTTPError as e:
+        e.read()
+        if e.code == 404:
+            return False
+        print(f"API GET /orgs/{org}/members/{login}: {e.code}")
+        return None
+    except Exception as e:
+        print(f"API GET /orgs/{org}/members/{login}: {e}")
+        return None
 
 
 CATEGORY_TYPES = {
@@ -257,7 +279,22 @@ def main():
         role_users.append((u, "Writer"))
     if visibility == "private":
         org_members = get_org_members()
-        non_members = [(u, role) for u, role in role_users if u and u not in org_members]
+        if not org_members:
+            print("WARN: 未能拉取组织成员列表（token 缺少 read:org?），改为逐用户校验")
+        non_members = []
+        for u, role in role_users:
+            if not u:
+                continue
+            if org_members:
+                if u not in org_members:
+                    non_members.append((u, role))
+            else:
+                r = check_org_member("huaweicloud", u)
+                if r is False:
+                    non_members.append((u, role))
+                elif r is None:
+                    # 接口异常无法判定时放行，交给人工审批兜底，避免把"查不到"当成"不是成员"
+                    print(f"WARN: 无法判定 {u} 是否为组织成员，跳过该项校验")
         if non_members:
             detail = "、".join(f"`{u}`({role})" for u, role in non_members)
             errors.append(f"- 以下角色用户不是组织成员（private 仓库 collaborator 须为组织成员，请先加入组织后再申请）：{detail}")
